@@ -54,6 +54,7 @@ curves_L = [
 ]
 
 
+
 # Krzywe dla litery "K"
 curves_K = [
     [[200, 100], [90, 50], [350, 45], [240, 105]],
