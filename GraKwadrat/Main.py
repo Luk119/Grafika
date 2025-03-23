@@ -92,7 +92,7 @@ while run:
 
     zielony_kwadrat = pygame.Rect(gx, gy, szerokosc, wysokosc)
 
-    win.fill((225, 220, 150))
+    win.fill((255, 197, 242))
 
     # Rysowanie i poruszanie czerwonych kwadratów
     for i, czerwony_kwadrat in enumerate(czerwone_kwadraty):
