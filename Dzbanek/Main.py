@@ -1,17 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from math import comb
 
-
-# Ustawienie backendu interaktywnego
-matplotlib.use('TkAgg')
-plt.ion()
-
+matplotlib.use('MacOSX')  # Zmień na TkAgg, jeśli masz tkinter
 
 def bernstein(n, i, t):
-    from math import comb
-    return comb(n, i) * (t * i) * ((1 - t) * (n - i))
-
+    return comb(n, i) * (t ** i) * ((1 - t) ** (n - i))
 
 def bezier_patch(control_points):
     resolution = 20
@@ -32,21 +27,18 @@ def bezier_patch(control_points):
             surface.append([px, py, pz])
     return np.array(surface)
 
-
 def plot_teapot(control_points):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     for k in range(control_points.shape[0]):
         surface = bezier_patch(control_points[k])
-        ax.scatter(surface[:, 0], surface[:, 1], surface[:, 2], s=1, color='b')
+        ax.plot_trisurf(surface[:, 0], surface[:, 1], surface[:, 2], color='b', alpha=0.5)
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
-    ax.view_init(elev=30, azim=45)  # Początkowy kąt widoku
-    ax.set_box_aspect([1, 1, 1])  # Utrzymanie równych proporcji osi
-    plt.show(block=True)  # Interaktywny widok umożliwiający obracanie myszką
-
-import numpy as np
+    ax.view_init(elev=30, azim=45)
+    ax.set_box_aspect([1, 1, 1])
+    plt.show(block=True)
 
 def read_control_points_from_txt(file_path, shape):
     with open(file_path, 'r') as file:
@@ -55,6 +47,8 @@ def read_control_points_from_txt(file_path, shape):
     if len(points) != shape[0] * shape[1]:
         raise ValueError("Nieprawidłowa liczba punktów w pliku txt " + file_path)
     return np.array(points).reshape(shape)
-file_path = "Dzbanek/punkty.txt"  # Ścieżka do pliku z punktami
+
+file_path = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty.txt"
 control_points = read_control_points_from_txt(file_path, (32, 16, 3))
+print(control_points.shape)  # Sprawdzenie poprawności
 plot_teapot(control_points)
