@@ -33,18 +33,18 @@ def plot_objects(teacup_points, teapot_points, spoon_points, shift_x=4.0):
     ax = fig.add_subplot(111, projection='3d')
 
     # Poprawiona orientacja filiżanki
-    teacup_points = np.copy(teacup_points)
+    teacup_points = np.copy(teacup_points) *  1.5
     teacup_points[:, :, [1, 2]] = teacup_points[:, :, [2, 1]]  # Zamiana Y i Z
     teacup_points[:, :, 0] += shift_x  # Przesunięcie filiżanki obok dzbanka
 
     # Przesunięcie łyżki dla lepszego widoku
-    spoon_points = np.copy(spoon_points)
+    spoon_points = np.copy(spoon_points) * 2
     spoon_points[:, :, 0] -= 2.0  # Przesunięcie w lewo
 
     # Rysowanie filiżanki
     for k in range(teacup_points.shape[0]):
         surface = bezier_patch(teacup_points[k])
-        ax.plot_trisurf(surface[:, 0], surface[:, 1], surface[:, 2], color='black', alpha=0.5)
+        ax.plot_trisurf(surface[:, 0], surface[:, 1], surface[:, 2], color='black', alpha=0.2)
 
     # Rysowanie dzbanka
     for k in range(teapot_points.shape[0]):
@@ -54,7 +54,7 @@ def plot_objects(teacup_points, teapot_points, spoon_points, shift_x=4.0):
     # Rysowanie łyżki
     for k in range(spoon_points.shape[0]):
         surface = bezier_patch(spoon_points[k])
-        ax.plot_trisurf(surface[:, 0], surface[:, 1], surface[:, 2], color='pink', alpha=0.9)
+        ax.plot_trisurf(surface[:, 0], surface[:, 1], surface[:, 2], color='pink', alpha=0.6)
 
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
