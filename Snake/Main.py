@@ -3,7 +3,7 @@ import time
 import random
 
 
-snake_speed = 15
+snake_speed = 5
 
 # Window size
 window_x = 720
