@@ -2,7 +2,12 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 from math import comb
-matplotlib.use('MacOSX')
+# (MacOs)
+# matplotlib.use('MacOSX')
+# (Windows)
+matplotlib.use('TkAgg')  # Lub inny kompatybilny backend, np. 'Qt5Agg'
+
+
 
 def bernstein(n, i, t):
     return comb(n, i) * (t ** i) * ((1 - t) ** (n - i))
@@ -33,7 +38,7 @@ def plot_objects(teacup_points, teapot_points, spoon_points, shift_x=4.0):
     ax = fig.add_subplot(111, projection='3d')
 
     # Poprawiona orientacja filiżanki
-    teacup_points = np.copy(teacup_points) *  1.5
+    teacup_points = np.copy(teacup_points) * 1.5
     teacup_points[:, :, [1, 2]] = teacup_points[:, :, [2, 1]]  # Zamiana Y i Z
     teacup_points[:, :, 0] += shift_x  # Przesunięcie filiżanki obok dzbanka
 
@@ -73,14 +78,18 @@ def read_control_points_from_txt(file_path, shape):
     return np.array(points).reshape(shape)
 
 
-# Wczytanie punktów kontrolnych dla filiżanki, dzbanka i łyżki
-teacup_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty2"
-teapot_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty.txt"
-spoon_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty3.txt"
+# Wczytanie punktów kontrolnych dla filiżanki, dzbanka i łyżki(MacOs)
+# teacup_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty2"
+# teapot_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty.txt"
+# spoon_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty3.txt"
+
+# (Windows)
+teacup_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty2"
+teapot_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty.txt"
+spoon_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty3.txt"
 
 teacup_points = read_control_points_from_txt(teacup_file, (26, 16, 3))
 teapot_points = read_control_points_from_txt(teapot_file, (32, 16, 3))
 spoon_points = read_control_points_from_txt(spoon_file, (16, 16, 3))
 
 plot_objects(teacup_points, teapot_points, spoon_points)
-
