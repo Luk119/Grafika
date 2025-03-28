@@ -5,7 +5,7 @@ from math import comb
 # (MacOs)
 # matplotlib.use('MacOSX')
 # (Windows)
-matplotlib.use('TkAgg')  # Lub inny kompatybilny backend, np. 'Qt5Agg'
+matplotlib.use('TkAgg')
 
 
 
