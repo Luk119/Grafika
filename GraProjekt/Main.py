@@ -95,10 +95,14 @@ class Gracz(pygame.sprite.Sprite):
         if self.skok:
             if self.vel_y < 0:
                 self.obecna_animacja = "jump_up"
-                self.image = self.animacje["jump_up"][0]
             else:
                 self.obecna_animacja = "jump_down"
-                self.image = self.animacje["jump_down"][0]
+
+            self.image = self.animacje[self.obecna_animacja][0]
+
+            # Obracamy tylko wtedy, gdy rzeczywiście zmienia się animacja skoku
+            if self.kierunek == -1:
+                self.image = pygame.transform.flip(self.image, True, False)
 
         self.vel_y += self.grawitacja
         self.rect.y += self.vel_y
@@ -109,6 +113,11 @@ class Gracz(pygame.sprite.Sprite):
             if self.skok:
                 self.obecna_animacja = "land"
                 self.image = self.animacje["land"][0]
+
+                # Obracanie postaci przy lądowaniu
+                if self.kierunek == -1:
+                    self.image = pygame.transform.flip(self.image, True, False)
+
                 self.czy_laduje = True
                 self.czas_ladowania = self.max_czas_ladowania
                 self.skok = False
@@ -144,15 +153,20 @@ class Przeciwnik(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.predkosc * self.kierunek
 
+        # Odbicie od ścian
         if self.rect.x <= 0 or self.rect.x >= SZEROKOSC - self.rect.width:
-            self.kierunek *= -1
+            self.kierunek *= -1  # Zmiana kierunku
+            self.image = pygame.transform.flip(self.image, True, False)  # Obrót przeciwnika
 
+        # Animacja
         self.czas_animacji += 1
         if self.czas_animacji >= 15:
             self.czas_animacji = 0
             self.klatka_animacji = (self.klatka_animacji + 1) % len(self.animacje)
             self.image = self.animacje[self.klatka_animacji]
-            if self.kierunek == -1:
+
+            # Obracanie przeciwnika zgodnie z kierunkiem ruchu
+            if self.kierunek == 1:
                 self.image = pygame.transform.flip(self.image, True, False)
 
 
