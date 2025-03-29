@@ -39,10 +39,10 @@ class Gracz(pygame.sprite.Sprite):
         self.animacje = {
             "idle": [load_image("playerIdle.png")],
             "run": [
-                load_image("playerRun2.png"),  # Lewa noga z przodu
-                load_image("playerIdle.png")   # Prawa noga z przodu
+                load_image("playerRun1.png"),  # Lewa noga z przodu
+                load_image("playerRun2.png")   # Prawa noga z przodu
             ],
-            "jump_up": [load_image("playerIdle.png")],    # Animacja wznoszenia
+            "jump_up": [load_image("playerJumpUp.png")],    # Animacja wznoszenia
             "jump_down": [load_image("playerJumpDown1.png")], # Animacja opadania
             "land": [load_image("playerLand.png")],
             "attack": [load_image("playerIdle.png")],
