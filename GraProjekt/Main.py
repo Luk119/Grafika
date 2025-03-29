@@ -59,7 +59,7 @@ def main():
     nowy_poziom(stan_gry, all_sprites, przeciwnicy, gracz)
 
     try:
-        tlo = pygame.image.load("background.png").convert()
+        tlo = pygame.image.load("gameImages/background.png").convert()
         tlo = pygame.transform.scale(tlo, (SZEROKOSC, WYSOKOSC))
     except pygame.error as e:
         print(f"Nie można załadować tła: {e}")
@@ -67,7 +67,7 @@ def main():
         tlo.fill((100, 100, 200))
 
     try:
-        podloga = pygame.image.load("ground.png").convert_alpha()
+        podloga = pygame.image.load("gameImages/ground.png").convert_alpha()
         podloga = pygame.transform.scale(podloga, (SZEROKOSC, WYSOKOSC - WYSOKOSC_PODLOGI))
     except pygame.error as e:
         print(f"Nie można załadować podłogi: {e}")
