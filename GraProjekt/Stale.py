@@ -8,7 +8,7 @@ SZEROKOSC = 1824
 WYSOKOSC = 1200
 WYSOKOSC_PODLOGI = 1000
 ekran = pygame.display.set_mode((SZEROKOSC, WYSOKOSC))
-pygame.display.set_caption("Szczurołap 007")
+pygame.display.set_caption("Elvis Szczurołap")
 
 # Kolory
 CZARNY = (0, 0, 0)
@@ -17,5 +17,5 @@ ZIELONY = (40, 150, 70)
 CZERWONY = (220, 30, 30)
 
 # Czcionka
-czcionka = pygame.font.SysFont('Broadway', 36)
-duza_czcionka = pygame.font.SysFont('Broadway', 72)
+czcionka = pygame.font.SysFont('Arial', 36)
+duza_czcionka = pygame.font.SysFont('Arial', 72)
