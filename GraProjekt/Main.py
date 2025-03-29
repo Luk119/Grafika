@@ -9,7 +9,7 @@ class StanGry:
     def __init__(self):
         self.punkty = 0
         self.poziom = 1
-        self.max_poziom = 3
+        self.max_poziom = 10
         self.czy_wyswietlac_komunikat = False
         self.czas_komunikatu = 0
         self.max_czas_komunikatu = 2 * 60
