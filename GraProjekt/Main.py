@@ -70,7 +70,7 @@ class Gracz(pygame.sprite.Sprite):
                 if self.kierunek == -1:
                     self.image = pygame.transform.flip(self.image, True, False)
 
-    def update(self):
+    def update(self, przeciwnicy):
         keys = pygame.key.get_pressed()
 
         if not self.czy_laduje:
@@ -107,20 +107,50 @@ class Gracz(pygame.sprite.Sprite):
         self.vel_y += self.grawitacja
         self.rect.y += self.vel_y
 
-        if self.rect.bottom >= WYSOKOSC_PODLOGI:
-            self.rect.bottom = WYSOKOSC_PODLOGI  # Ustawiamy bottom na wysokość podłogi
-            self.vel_y = 0
-            if self.skok:
-                self.obecna_animacja = "land"
-                self.image = self.animacje["land"][0]
+        # Sprawdzamy kolizję z przeciwnikami podczas spadania
+        if self.vel_y > 0:  # Tylko gdy spadamy
+            for przeciwnik in przeciwnicy:
+                if (self.rect.bottom >= przeciwnik.rect.top and
+                        self.rect.bottom <= przeciwnik.rect.top + 20 and  # Tolerancja 20 pikseli
+                        self.rect.left < przeciwnik.rect.right and
+                        self.rect.right > przeciwnik.rect.left):
+                    # Zabijamy przeciwnika
+                    przeciwnicy.remove(przeciwnik)
+                    przeciwnik.kill()
 
-                # Obracanie postaci przy lądowaniu
-                if self.kierunek == -1:
-                    self.image = pygame.transform.flip(self.image, True, False)
+                    # Odbijamy się lekko po zabiciu przeciwnika
+                    self.vel_y = -self.sila_skoku / 2
+                    break
+            else:  # Jeśli nie trafiliśmy na przeciwnika
+                if self.rect.bottom >= WYSOKOSC_PODLOGI:
+                    self.rect.bottom = WYSOKOSC_PODLOGI
+                    self.vel_y = 0
+                    if self.skok:
+                        self.obecna_animacja = "land"
+                        self.image = self.animacje["land"][0]
 
-                self.czy_laduje = True
-                self.czas_ladowania = self.max_czas_ladowania
-                self.skok = False
+                        # Obracanie postaci przy lądowaniu
+                        if self.kierunek == -1:
+                            self.image = pygame.transform.flip(self.image, True, False)
+
+                        self.czy_laduje = True
+                        self.czas_ladowania = self.max_czas_ladowania
+                        self.skok = False
+        else:  # Jeśli nie spadamy
+            if self.rect.bottom >= WYSOKOSC_PODLOGI:
+                self.rect.bottom = WYSOKOSC_PODLOGI
+                self.vel_y = 0
+                if self.skok:
+                    self.obecna_animacja = "land"
+                    self.image = self.animacje["land"][0]
+
+                    # Obracanie postaci przy lądowaniu
+                    if self.kierunek == -1:
+                        self.image = pygame.transform.flip(self.image, True, False)
+
+                    self.czy_laduje = True
+                    self.czas_ladowania = self.max_czas_ladowania
+                    self.skok = False
 
         if self.czy_laduje:
             self.czas_ladowania -= 1
@@ -187,7 +217,7 @@ def main():
 
     # Ładowanie tła
     try:
-        tlo = pygame.image.load("background.png").convert()
+        tlo = pygame.image.load("background2.png").convert()
         tlo = pygame.transform.scale(tlo, (SZEROKOSC, WYSOKOSC))
     except pygame.error as e:
         print(f"Nie można załadować tła: {e}")
@@ -208,7 +238,8 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        all_sprites.update()
+        gracz.update(przeciwnicy)
+        przeciwnicy.update()
 
         ekran.blit(tlo, (0, 0))
         ekran.blit(podloga, (0, WYSOKOSC_PODLOGI))
