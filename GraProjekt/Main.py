@@ -1,221 +1,63 @@
 import pygame
 import sys
+from Przeciwnik import *
+from Gracz import *
+from Stale import *
 
-# Inicjalizacja PyGame
-pygame.init()
+# Stan gry
+class StanGry:
+    def __init__(self):
+        self.punkty = 0
+        self.poziom = 1
+        self.max_poziom = 3
+        self.czy_wyswietlac_komunikat = False
+        self.czas_komunikatu = 0
+        self.max_czas_komunikatu = 2 * 60
+        self.czy_wygrana = False
+        self.czy_koniec_gry = False
 
-# Ustawienia ekranu
-SZEROKOSC = 1824
-WYSOKOSC = 1200
-WYSOKOSC_PODLOGI = 1000
-ekran = pygame.display.set_mode((SZEROKOSC, WYSOKOSC))
-pygame.display.set_caption("Szczurołap 007")
+def nowy_poziom(stan_gry, all_sprites, przeciwnicy, gracz):
+    # Usuń wszystkich przeciwników
+    for przeciwnik in przeciwnicy:
+        przeciwnik.kill()
+    przeciwnicy.empty()
 
-# Kolory
-CZARNY = (0, 0, 0)
-BIALY = (255, 255, 255)
+    # Utwórz nowych przeciwników (liczba równa poziomowi + 2)
+    liczba_przeciwnikow = stan_gry.poziom + 2
+    predkosc_przeciwnikow = 2 + stan_gry.poziom * 0.2  # Zwiększ prędkość z każdym poziomem
 
+    for i in range(liczba_przeciwnikow):
+        x = 300 + i * (SZEROKOSC - 600) // liczba_przeciwnikow
+        przeciwnik = Przeciwnik(x, WYSOKOSC_PODLOGI, predkosc_przeciwnikow)
+        all_sprites.add(przeciwnik)
+        przeciwnicy.add(przeciwnik)
 
-# Ładowanie grafik
-def load_image(path, scale=1):
-    try:
-        img = pygame.image.load(path).convert_alpha()
-        return pygame.transform.scale(img, (img.get_width() * scale, img.get_height() * scale))
-    except pygame.error as e:
-        print(f"Błąd ładowania obrazu: {path}")
-        print(f"Błąd: {e}")
-        surf = pygame.Surface((50, 80), pygame.SRCALPHA)
-        pygame.draw.rect(surf, (255, 0, 0, 128), (0, 0, 50, 80))
-        return surf
+    # Ustaw gracza na początku poziomu
+    gracz.rect.x = 100
+    gracz.rect.bottom = WYSOKOSC_PODLOGI
+    gracz.vel_y = 0
+    gracz.skok = False
+    gracz.czy_laduje = False
+    gracz.obecna_animacja = "idle"
+    gracz.image = gracz.animacje["idle"][0]
 
-
-# Klasa Gracza
-class Gracz(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.animacje = {
-            "idle": [load_image("playerIdle.png")],
-            "run": [
-                load_image("playerRun1.png"),
-                load_image("playerRun2.png")
-            ],
-            "jump_up": [load_image("playerJumpUp.png")],
-            "jump_down": [load_image("playerJumpDown.png")],
-            "land": [load_image("playerLand.png")],
-        }
-        self.obecna_animacja = "idle"
-        self.klatka_animacji = 0
-        self.czas_animacji = 0
-        self.image = self.animacje[self.obecna_animacja][0]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.bottom = y  # Używamy bottom zamiast y, aby lepiej kontrolować pozycję względem podłogi
-        self.predkosc = 5
-        self.skok = False
-        self.sila_skoku = 30
-        self.grawitacja = 0.6
-        self.vel_y = 0
-        self.kierunek = 1
-        self.czy_laduje = False
-        self.czas_ladowania = 0
-        self.max_czas_ladowania = 0.4 * 60
-
-    def update_animacja(self):
-        if self.obecna_animacja == "run":
-            self.czas_animacji += 1
-            if self.czas_animacji >= 10:
-                self.czas_animacji = 0
-                self.klatka_animacji = (self.klatka_animacji + 1) % len(self.animacje["run"])
-                self.image = self.animacje["run"][self.klatka_animacji]
-                if self.kierunek == -1:
-                    self.image = pygame.transform.flip(self.image, True, False)
-
-    def update(self, przeciwnicy):
-        keys = pygame.key.get_pressed()
-
-        if not self.czy_laduje:
-            if keys[pygame.K_LEFT]:
-                self.rect.x -= self.predkosc
-                self.kierunek = -1
-                self.obecna_animacja = "run"
-            elif keys[pygame.K_RIGHT]:
-                self.rect.x += self.predkosc
-                self.kierunek = 1
-                self.obecna_animacja = "run"
-            else:
-                self.obecna_animacja = "idle"
-                self.image = self.animacje["idle"][0]
-
-        if keys[pygame.K_SPACE] and not self.skok and not self.czy_laduje:
-            self.vel_y = -self.sila_skoku
-            self.skok = True
-            self.obecna_animacja = "jump_up"
-            self.image = self.animacje["jump_up"][0]
-
-        if self.skok:
-            if self.vel_y < 0:
-                self.obecna_animacja = "jump_up"
-            else:
-                self.obecna_animacja = "jump_down"
-
-            self.image = self.animacje[self.obecna_animacja][0]
-
-            # Obracamy tylko wtedy, gdy rzeczywiście zmienia się animacja skoku
-            if self.kierunek == -1:
-                self.image = pygame.transform.flip(self.image, True, False)
-
-        self.vel_y += self.grawitacja
-        self.rect.y += self.vel_y
-
-        # Sprawdzamy kolizję z przeciwnikami podczas spadania
-        if self.vel_y > 0:  # Tylko gdy spadamy
-            for przeciwnik in przeciwnicy:
-                if (self.rect.bottom >= przeciwnik.rect.top and
-                        self.rect.bottom <= przeciwnik.rect.top + 20 and  # Tolerancja 20 pikseli
-                        self.rect.left < przeciwnik.rect.right and
-                        self.rect.right > przeciwnik.rect.left):
-                    # Zabijamy przeciwnika
-                    przeciwnicy.remove(przeciwnik)
-                    przeciwnik.kill()
-
-                    # Odbijamy się lekko po zabiciu przeciwnika
-                    self.vel_y = -self.sila_skoku / 2
-                    break
-            else:  # Jeśli nie trafiliśmy na przeciwnika
-                if self.rect.bottom >= WYSOKOSC_PODLOGI:
-                    self.rect.bottom = WYSOKOSC_PODLOGI
-                    self.vel_y = 0
-                    if self.skok:
-                        self.obecna_animacja = "land"
-                        self.image = self.animacje["land"][0]
-
-                        # Obracanie postaci przy lądowaniu
-                        if self.kierunek == -1:
-                            self.image = pygame.transform.flip(self.image, True, False)
-
-                        self.czy_laduje = True
-                        self.czas_ladowania = self.max_czas_ladowania
-                        self.skok = False
-        else:  # Jeśli nie spadamy
-            if self.rect.bottom >= WYSOKOSC_PODLOGI:
-                self.rect.bottom = WYSOKOSC_PODLOGI
-                self.vel_y = 0
-                if self.skok:
-                    self.obecna_animacja = "land"
-                    self.image = self.animacje["land"][0]
-
-                    # Obracanie postaci przy lądowaniu
-                    if self.kierunek == -1:
-                        self.image = pygame.transform.flip(self.image, True, False)
-
-                    self.czy_laduje = True
-                    self.czas_ladowania = self.max_czas_ladowania
-                    self.skok = False
-
-        if self.czy_laduje:
-            self.czas_ladowania -= 1
-            if self.czas_ladowania <= 0:
-                self.czy_laduje = False
-                self.obecna_animacja = "idle"
-                self.image = self.animacje["idle"][0]
-
-        self.update_animacja()
-
-
-# Klasa Przeciwnika
-class Przeciwnik(pygame.sprite.Sprite):
-    def __init__(self, x, wysokosc_podlogi):
-        super().__init__()
-        self.animacje = [
-            load_image("enemy1.png"),
-            load_image("enemy2.png")
-        ]
-        self.klatka_animacji = 0
-        self.czas_animacji = 0
-        self.image = self.animacje[self.klatka_animacji]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        # Ustawiamy przeciwników na podłodze (bottom = WYSOKOSC_PODLOGI)
-        self.rect.bottom = wysokosc_podlogi
-        self.predkosc = 2
-        self.kierunek = 1
-
-    def update(self):
-        self.rect.x += self.predkosc * self.kierunek
-
-        # Odbicie od ścian
-        if self.rect.x <= 0 or self.rect.x >= SZEROKOSC - self.rect.width:
-            self.kierunek *= -1  # Zmiana kierunku
-            self.image = pygame.transform.flip(self.image, True, False)  # Obrót przeciwnika
-
-        # Animacja
-        self.czas_animacji += 1
-        if self.czas_animacji >= 15:
-            self.czas_animacji = 0
-            self.klatka_animacji = (self.klatka_animacji + 1) % len(self.animacje)
-            self.image = self.animacje[self.klatka_animacji]
-
-            # Obracanie przeciwnika zgodnie z kierunkiem ruchu
-            if self.kierunek == 1:
-                self.image = pygame.transform.flip(self.image, True, False)
+    # Wyświetl komunikat o nowym poziomie
+    stan_gry.czy_wyswietlac_komunikat = True
+    stan_gry.czas_komunikatu = stan_gry.max_czas_komunikatu
 
 
 def main():
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
     przeciwnicy = pygame.sprite.Group()
+    stan_gry = StanGry()
 
-    # Tworzymy gracza - ustawiamy go na podłodze (bottom=WYSOKOSC_PODLOGI)
     gracz = Gracz(100, WYSOKOSC_PODLOGI)
     all_sprites.add(gracz)
 
-    # Tworzymy przeciwników na podłodze
-    for i in range(3):
-        przeciwnik = Przeciwnik(300 + i * 150, WYSOKOSC_PODLOGI)
-        all_sprites.add(przeciwnik)
-        przeciwnicy.add(przeciwnik)
+    # Rozpocznij pierwszy poziom
+    nowy_poziom(stan_gry, all_sprites, przeciwnicy, gracz)
 
-    # Ładowanie tła
     try:
         tlo = pygame.image.load("background.png").convert()
         tlo = pygame.transform.scale(tlo, (SZEROKOSC, WYSOKOSC))
@@ -238,12 +80,59 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        gracz.update(przeciwnicy)
+        gracz.update(przeciwnicy, stan_gry)
         przeciwnicy.update()
+
+        # Sprawdź czy wszyscy przeciwnicy zostali pokonani
+        if len(przeciwnicy) == 0 and not stan_gry.czy_wyswietlac_komunikat:
+            if stan_gry.poziom < stan_gry.max_poziom:
+                stan_gry.poziom += 1
+                nowy_poziom(stan_gry, all_sprites, przeciwnicy, gracz)
+            else:
+                stan_gry.czy_wygrana = True
+                stan_gry.czy_wyswietlac_komunikat = True
+                stan_gry.czas_komunikatu = stan_gry.max_czas_komunikatu
+
+        # Aktualizuj czas wyświetlania komunikatu
+        if stan_gry.czy_wyswietlac_komunikat:
+            stan_gry.czas_komunikatu -= 1
+            if stan_gry.czas_komunikatu <= 0:
+                stan_gry.czy_wyswietlac_komunikat = False
 
         ekran.blit(tlo, (0, 0))
         ekran.blit(podloga, (0, WYSOKOSC_PODLOGI))
         all_sprites.draw(ekran)
+
+        # Wyświetlanie punktów i poziomu
+        tekst_punkty = czcionka.render(f"Punkty: {stan_gry.punkty}", True, BIALY)
+        ekran.blit(tekst_punkty, (20, WYSOKOSC - 50))
+
+        tekst_poziom = czcionka.render(f"Poziom: {stan_gry.poziom}/{stan_gry.max_poziom}", True, BIALY)
+        ekran.blit(tekst_poziom, (20, WYSOKOSC - 100))
+
+        # Wyświetlanie komunikatu o nowym poziomie lub wygranej
+        if stan_gry.czy_wyswietlac_komunikat:
+            if stan_gry.czy_wygrana:
+                tekst_komunikat = duza_czcionka.render("Zwycięstwo!", True, ZIELONY)
+            else:
+                tekst_komunikat = duza_czcionka.render(f"Poziom {stan_gry.poziom}", True, ZIELONY)
+
+            szerokosc_tekstu = tekst_komunikat.get_width()
+            ekran.blit(tekst_komunikat, (SZEROKOSC // 2 - szerokosc_tekstu // 2, WYSOKOSC // 2 - 100))
+
+        # Wyświetlanie życia
+        tekst_zycie = czcionka.render(f"Zdrowie: {' 0' * gracz.zycie}", True, ZIELONY)
+        ekran.blit(tekst_zycie, (20, WYSOKOSC - 150))
+
+        # Sprawdź koniec gry
+        if stan_gry.czy_koniec_gry:
+            tekst_koniec = duza_czcionka.render("Koniec gry!", True, CZERWONY)
+            szerokosc_tekstu = tekst_koniec.get_width()
+            ekran.blit(tekst_koniec, (SZEROKOSC // 2 - szerokosc_tekstu // 2, WYSOKOSC // 2 - 100))
+            pygame.display.flip()
+            pygame.time.wait(3000)  # Czekaj 3 sekundy
+            running = False
+
         pygame.display.flip()
         clock.tick(60)
 
