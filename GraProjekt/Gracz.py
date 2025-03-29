@@ -23,8 +23,8 @@ class Gracz(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.predkosc = 5
         self.skok = False
-        self.sila_skoku = 30
-        self.grawitacja = 0.6
+        self.sila_skoku = 27
+        self.grawitacja = 0.9
         self.vel_y = 0
         self.kierunek = 1
         self.czy_laduje = False
