@@ -24,9 +24,12 @@ def load_image(path, scale=1):
     except pygame.error as e:
         print(f"Błąd ładowania obrazu: {path}")
         print(f"Błąd: {e}")
-        # Tworzenie zastępczego obrazu jeśli plik nie istnieje
-        surf = pygame.Surface((50, 50), pygame.SRCALPHA)
-        pygame.draw.rect(surf, (255, 0, 0), (0, 0, 50, 50))
+        # Zastępcza grafika z kolorem i napisem
+        surf = pygame.Surface((50, 80), pygame.SRCALPHA)
+        pygame.draw.rect(surf, (255, 0, 0, 128), (0, 0, 50, 80))
+        font = pygame.font.SysFont(None, 20)
+        text = font.render(path.split('.')[0], True, BIALY)
+        surf.blit(text, (5, 30))
         return surf
 
 
@@ -34,79 +37,85 @@ def load_image(path, scale=1):
 class Gracz(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
+        # Ładowanie wszystkich animacji
         self.animacje = {
             "idle": [load_image("playerIdle.png")],
             "run": [
-                load_image("playerRun1.png"),  # Pierwsza klatka biegu
-                load_image("playerJumpDown.png")  # Druga klatka biegu
+                load_image("playerRun1.png"),  # Lewa noga z przodu
+                load_image("playerIdle.png")  # Prawa noga z przodu
             ],
-            "jump_up": [load_image("playerJumpDown.png")],
-            "jump_down": [load_image("playerJumpDown.png")],
+            "jump": [load_image("playerJumpDown.png")],
             "land": [load_image("playerLand.png")],
             "attack": [load_image("playerIdle.png")],
         }
+
+        # Parametry animacji
         self.obecna_animacja = "idle"
-        self.image = self.animacje[self.obecna_animacja][0]
+        self.klatka_animacji = 0
+        self.czas_animacji = 0
+        self.szybkosc_animacji = 0.15  # Im mniejsza wartość, tym szybsza animacja
+
+        self.image = self.animacje[self.obecna_animacja][self.klatka_animacji]
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+        # Fizyka
         self.predkosc = 5
         self.skok = False
         self.sila_skoku = 20
         self.grawitacja = 0.6
         self.vel_y = 0
-        self.kierunek = 1
+        self.kierunek = 1  # 1 dla prawo, -1 dla lewo
+
+        # Stan lądowania
         self.czy_laduje = False
         self.czas_ladowania = 0
-        self.max_czas_ladowania = 12
-        self.poprzednia_animacja = "idle"
+        self.max_czas_ladowania = 0.2 * 60  # 0.2 sekundy
 
-        # Animacja biegu
-        self.klatka_biegu = 0
-        self.czas_animacji = 0
-        self.czas_zmiany_klatki = 10  # Co 10 klatek zmiana (przy 60 FPS to ~6 klatek/sekundę)
+    def update_animacja(self):
+        # Aktualizacja klatek animacji
+        if self.obecna_animacja in ["run", "attack"]:
+            self.czas_animacji += 1
+            if self.czas_animacji >= self.szybkosc_animacji * 60:
+                self.czas_animacji = 0
+                self.klatka_animacji = (self.klatka_animacji + 1) % len(self.animacje[self.obecna_animacja])
+
+        # Ustawienie odpowiedniej klatki animacji
+        self.image = self.animacje[self.obecna_animacja][self.klatka_animacji]
+        if self.kierunek == -1:
+            self.image = pygame.transform.flip(self.image, True, False)
 
     def update(self):
         keys = pygame.key.get_pressed()
 
-        # Zapamiętanie poprzedniej animacji
-        self.poprzednia_animacja = self.obecna_animacja
+        # Reset animacji jeśli zmieniamy stan
+        if self.obecna_animacja not in ["jump", "land"]:
+            if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
+                if self.obecna_animacja != "run":
+                    self.obecna_animacja = "run"
+                    self.klatka_animacji = 0
+                    self.czas_animacji = 0
+            else:
+                if self.obecna_animacja != "idle":
+                    self.obecna_animacja = "idle"
+                    self.klatka_animacji = 0
 
-        # Sterowanie tylko gdy nie lądujemy
+        # Poruszanie się
         if not self.czy_laduje:
             if keys[pygame.K_LEFT]:
                 self.rect.x -= self.predkosc
                 self.kierunek = -1
-                if not self.skok:
-                    self.obecna_animacja = "run"
             elif keys[pygame.K_RIGHT]:
                 self.rect.x += self.predkosc
                 self.kierunek = 1
-                if not self.skok:
-                    self.obecna_animacja = "run"
-            elif not self.skok:
-                self.obecna_animacja = "idle"
-                self.klatka_biegu = 0  # Reset animacji biegu gdy stoimy
-
-        # Aktualizacja animacji biegu
-        if self.obecna_animacja == "run" and not self.skok and not self.czy_laduje:
-            self.czas_animacji += 1
-            if self.czas_animacji >= self.czas_zmiany_klatki:
-                self.czas_animacji = 0
-                self.klatka_biegu = (self.klatka_biegu + 1) % len(self.animacje["run"])
 
         # Skok
         if keys[pygame.K_SPACE] and not self.skok and not self.czy_laduje:
             self.vel_y = -self.sila_skoku
             self.skok = True
-            self.obecna_animacja = "jump_up"
-
-        # Zmiana animacji w trakcie skoku
-        if self.skok:
-            if self.vel_y < 0:
-                self.obecna_animacja = "jump_up"
-            else:
-                self.obecna_animacja = "jump_down"
+            self.obecna_animacja = "jump"
+            self.klatka_animacji = 0
 
         # Grawitacja
         self.vel_y += self.grawitacja
@@ -117,34 +126,28 @@ class Gracz(pygame.sprite.Sprite):
             self.rect.y = WYSOKOSC_PODLOGI
             self.vel_y = 0
 
-            if self.skok or self.poprzednia_animacja in ["jump_up", "jump_down"]:
+            if self.skok:
                 self.obecna_animacja = "land"
                 self.czy_laduje = True
                 self.czas_ladowania = self.max_czas_ladowania
                 self.skok = False
-            elif not self.czy_laduje:
-                self.obecna_animacja = "idle"
+                self.klatka_animacji = 0
 
-        # Animacja lądowania
+        # Lądowanie
         if self.czy_laduje:
             self.czas_ladowania -= 1
             if self.czas_ladowania <= 0:
                 self.czy_laduje = False
                 self.obecna_animacja = "idle"
+                self.klatka_animacji = 0
 
         # Atak
-        if not self.skok and not self.czy_laduje:
-            if keys[pygame.K_z]:
-                self.obecna_animacja = "attack"
+        if keys[pygame.K_z] and not self.skok and not self.czy_laduje:
+            self.obecna_animacja = "attack"
+            self.klatka_animacji = 0
 
-        # Aktualizacja obrazu
-        if self.obecna_animacja == "run":
-            self.image = self.animacje["run"][self.klatka_biegu]
-        else:
-            self.image = self.animacje[self.obecna_animacja][0]
-
-        if self.kierunek == -1:
-            self.image = pygame.transform.flip(self.image, True, False)
+        # Aktualizacja animacji
+        self.update_animacja()
 # Klasa Przeciwnika
 class Przeciwnik(pygame.sprite.Sprite):
     def __init__(self, x, y):
