@@ -217,7 +217,7 @@ def main():
 
     # Ładowanie tła
     try:
-        tlo = pygame.image.load("background2.png").convert()
+        tlo = pygame.image.load("background.png").convert()
         tlo = pygame.transform.scale(tlo, (SZEROKOSC, WYSOKOSC))
     except pygame.error as e:
         print(f"Nie można załadować tła: {e}")
