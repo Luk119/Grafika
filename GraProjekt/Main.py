@@ -121,12 +121,12 @@ def main():
             ekran.blit(tekst_komunikat, (SZEROKOSC // 2 - szerokosc_tekstu // 2, WYSOKOSC // 2 - 100))
 
         # Wyświetlanie życia
-        tekst_zycie = czcionka.render(f"Zdrowie: {' 0' * gracz.zycie}", True, ZIELONY)
+        tekst_zycie = czcionka.render(f"Zdrowie: {' ❤️' * gracz.zycie}", True, ZIELONY)
         ekran.blit(tekst_zycie, (20, WYSOKOSC - 150))
 
         # Sprawdź koniec gry
         if stan_gry.czy_koniec_gry:
-            tekst_koniec = duza_czcionka.render("Koniec gry!", True, CZERWONY)
+            tekst_koniec = duza_czcionka.render("Porażka!", True, CZERWONY)
             szerokosc_tekstu = tekst_koniec.get_width()
             ekran.blit(tekst_koniec, (SZEROKOSC // 2 - szerokosc_tekstu // 2, WYSOKOSC // 2 - 100))
             pygame.display.flip()
