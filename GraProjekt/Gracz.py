@@ -5,14 +5,14 @@ class Gracz(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.animacje = {
-            "idle": [load_image("playerIdle.png")],
+            "idle": [load_image("gameImages/playerIdle.png")],
             "run": [
-                load_image("playerRun1.png"),
-                load_image("playerRun2.png")
+                load_image("gameImages/playerRun1.png"),
+                load_image("gameImages/playerRun2.png")
             ],
-            "jump_up": [load_image("playerJumpUp.png")],
-            "jump_down": [load_image("playerJumpDown.png")],
-            "land": [load_image("playerLand.png")],
+            "jump_up": [load_image("gameImages/playerJumpUp.png")],
+            "jump_down": [load_image("gameImages/playerJumpDown.png")],
+            "land": [load_image("gameImages/playerLand.png")],
         }
         self.obecna_animacja = "idle"
         self.klatka_animacji = 0
