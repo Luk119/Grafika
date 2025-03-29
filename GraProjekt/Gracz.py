@@ -24,12 +24,12 @@ class Gracz(pygame.sprite.Sprite):
         self.predkosc = 5
         self.skok = False
         self.sila_skoku = 27
-        self.grawitacja = 0.9
+        self.grawitacja = 0.8
         self.vel_y = 0
         self.kierunek = 1
         self.czy_laduje = False
         self.czas_ladowania = 0
-        self.max_czas_ladowania = 0.4 * 60
+        self.max_czas_ladowania = 0.25 * 60
         self.zycie = 5  # Dodajemy życie gracza (5 punktów)
         self.obrazenia = False  # Flaga obrażeń
         self.czas_obrazen = 0  # Czas odporności po otrzymaniu obrażeń
@@ -67,7 +67,7 @@ class Gracz(pygame.sprite.Sprite):
                 self.obecna_animacja = "idle"
                 self.image = self.animacje["idle"][0]
 
-        if keys[pygame.K_SPACE] and not self.skok and not self.czy_laduje:
+        if keys[pygame.K_UP] and not self.skok and not self.czy_laduje:
             self.vel_y = -self.sila_skoku
             self.skok = True
             self.obecna_animacja = "jump_up"
@@ -158,8 +158,10 @@ class Gracz(pygame.sprite.Sprite):
                     # Odbij gracza w przeciwnym kierunku
                     if self.rect.centerx < przeciwnik.rect.centerx:
                         self.rect.x -= 50  # Odbij w lewo
+                        self.rect.y -= 30
                     else:
                         self.rect.x += 50  # Odbij w prawo
+                        self.rect.y -= 30
 
                     # Sprawdź czy gracz stracił wszystkie życia
                     if self.zycie <= 0:
