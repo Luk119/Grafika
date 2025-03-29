@@ -9,12 +9,11 @@ SZEROKOSC = 1824
 WYSOKOSC = 1200
 WYSOKOSC_PODLOGI = 900
 ekran = pygame.display.set_mode((SZEROKOSC, WYSOKOSC))
-pygame.display.set_caption("Prosta RPG")
+pygame.display.set_caption("Prosta RPG z pełnymi animacjami")
 
 # Kolory
 CZARNY = (0, 0, 0)
 BIALY = (255, 255, 255)
-
 
 # Ładowanie grafik
 def load_image(path, scale=1):
@@ -32,7 +31,6 @@ def load_image(path, scale=1):
         surf.blit(text, (5, 30))
         return surf
 
-
 # Klasa Gracza
 class Gracz(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -41,10 +39,11 @@ class Gracz(pygame.sprite.Sprite):
         self.animacje = {
             "idle": [load_image("playerIdle.png")],
             "run": [
-                load_image("playerRun1.png"),  # Lewa noga z przodu
-                load_image("playerIdle.png")  # Prawa noga z przodu
+                load_image("playerRun2.png"),  # Lewa noga z przodu
+                load_image("playerIdle.png")   # Prawa noga z przodu
             ],
-            "jump": [load_image("playerJumpDown.png")],
+            "jump_up": [load_image("playerIdle.png")],    # Animacja wznoszenia
+            "jump_down": [load_image("playerJumpDown1.png")], # Animacja opadania
             "land": [load_image("playerLand.png")],
             "attack": [load_image("playerIdle.png")],
         }
@@ -71,7 +70,7 @@ class Gracz(pygame.sprite.Sprite):
         # Stan lądowania
         self.czy_laduje = False
         self.czas_ladowania = 0
-        self.max_czas_ladowania = 0.2 * 60  # 0.2 sekundy
+        self.max_czas_ladowania = 0.4 * 60  # 0.2 sekundy
 
     def update_animacja(self):
         # Aktualizacja klatek animacji
@@ -89,8 +88,8 @@ class Gracz(pygame.sprite.Sprite):
     def update(self):
         keys = pygame.key.get_pressed()
 
-        # Reset animacji jeśli zmieniamy stan
-        if self.obecna_animacja not in ["jump", "land"]:
+        # Reset animacji jeśli zmieniamy stan (ale nie podczas skoku/lądowania)
+        if self.obecna_animacja not in ["jump_up", "jump_down", "land"]:
             if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
                 if self.obecna_animacja != "run":
                     self.obecna_animacja = "run"
@@ -114,8 +113,15 @@ class Gracz(pygame.sprite.Sprite):
         if keys[pygame.K_SPACE] and not self.skok and not self.czy_laduje:
             self.vel_y = -self.sila_skoku
             self.skok = True
-            self.obecna_animacja = "jump"
+            self.obecna_animacja = "jump_up"
             self.klatka_animacji = 0
+
+        # Zmiana animacji w trakcie skoku
+        if self.skok:
+            if self.vel_y < 0:  # Wznoszenie
+                self.obecna_animacja = "jump_up"
+            else:  # Opadanie
+                self.obecna_animacja = "jump_down"
 
         # Grawitacja
         self.vel_y += self.grawitacja
@@ -126,7 +132,7 @@ class Gracz(pygame.sprite.Sprite):
             self.rect.y = WYSOKOSC_PODLOGI
             self.vel_y = 0
 
-            if self.skok:
+            if self.skok or self.obecna_animacja in ["jump_up", "jump_down"]:
                 self.obecna_animacja = "land"
                 self.czy_laduje = True
                 self.czas_ladowania = self.max_czas_ladowania
@@ -148,6 +154,7 @@ class Gracz(pygame.sprite.Sprite):
 
         # Aktualizacja animacji
         self.update_animacja()
+
 # Klasa Przeciwnika
 class Przeciwnik(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -165,7 +172,6 @@ class Przeciwnik(pygame.sprite.Sprite):
         if self.rect.x <= 0 or self.rect.x >= SZEROKOSC - 50:
             self.kierunek *= -1
             self.image = pygame.transform.flip(self.image, True, False)
-
 
 # Główna pętla gry
 def main():
@@ -214,7 +220,6 @@ def main():
 
     pygame.quit()
     sys.exit()
-
 
 if __name__ == "__main__":
     main()
