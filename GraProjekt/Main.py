@@ -1,5 +1,4 @@
 import pygame
-import os
 import sys
 
 # Inicjalizacja PyGame
@@ -8,6 +7,7 @@ pygame.init()
 # Ustawienia ekranu
 SZEROKOSC = 1824
 WYSOKOSC = 1200
+WYSOKOSC_PODLOGI = 900
 ekran = pygame.display.set_mode((SZEROKOSC, WYSOKOSC))
 pygame.display.set_caption("Prosta RPG")
 
@@ -15,17 +15,20 @@ pygame.display.set_caption("Prosta RPG")
 CZARNY = (0, 0, 0)
 BIALY = (255, 255, 255)
 
+
 # Ładowanie grafik
 def load_image(path, scale=1):
     try:
         img = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(img, (img.get_width() * scale, img.get_height() * scale))
-    except:
+    except pygame.error as e:
         print(f"Błąd ładowania obrazu: {path}")
+        print(f"Błąd: {e}")
         # Tworzenie zastępczego obrazu jeśli plik nie istnieje
         surf = pygame.Surface((50, 50), pygame.SRCALPHA)
         pygame.draw.rect(surf, (255, 0, 0), (0, 0, 50, 50))
         return surf
+
 
 # Klasa Gracza
 class Gracz(pygame.sprite.Sprite):
@@ -33,10 +36,14 @@ class Gracz(pygame.sprite.Sprite):
         super().__init__()
         self.animacje = {
             "idle": [load_image("playerIdle.png")],
-            "run": [load_image("playerIdle.png")],
-            "jump": [load_image("playerJump.png")],
-            "attack": [load_image("img.png")],
-            "shoot": [load_image("img.png")],
+            "run": [
+                load_image("playerRun1.png"),  # Pierwsza klatka biegu
+                load_image("playerJumpDown.png")  # Druga klatka biegu
+            ],
+            "jump_up": [load_image("playerJumpDown.png")],
+            "jump_down": [load_image("playerJumpDown.png")],
+            "land": [load_image("playerLand.png")],
+            "attack": [load_image("playerIdle.png")],
         }
         self.obecna_animacja = "idle"
         self.image = self.animacje[self.obecna_animacja][0]
@@ -46,75 +53,103 @@ class Gracz(pygame.sprite.Sprite):
         self.predkosc = 5
         self.skok = False
         self.sila_skoku = 20
-        self.grawitacja = 0.3
+        self.grawitacja = 0.6
         self.vel_y = 0
         self.kierunek = 1
-        self.czas_skoku = 0  # Licznik czasu skoku
-        self.czas_trwania_skoku = 30  # Klatki animacji skoku (około 0.5 sekundy przy 60 FPS)
+        self.czy_laduje = False
+        self.czas_ladowania = 0
+        self.max_czas_ladowania = 12
+        self.poprzednia_animacja = "idle"
+
+        # Animacja biegu
+        self.klatka_biegu = 0
+        self.czas_animacji = 0
+        self.czas_zmiany_klatki = 10  # Co 10 klatek zmiana (przy 60 FPS to ~6 klatek/sekundę)
 
     def update(self):
-        # Poruszanie
         keys = pygame.key.get_pressed()
 
-        # Jeśli nie jesteśmy w trakcie skoku, pozwalamy na zmianę animacji
-        if not self.skok or self.czas_skoku <= 0:
+        # Zapamiętanie poprzedniej animacji
+        self.poprzednia_animacja = self.obecna_animacja
+
+        # Sterowanie tylko gdy nie lądujemy
+        if not self.czy_laduje:
             if keys[pygame.K_LEFT]:
                 self.rect.x -= self.predkosc
                 self.kierunek = -1
-                self.obecna_animacja = "run"
+                if not self.skok:
+                    self.obecna_animacja = "run"
             elif keys[pygame.K_RIGHT]:
                 self.rect.x += self.predkosc
                 self.kierunek = 1
-                self.obecna_animacja = "run"
-            else:
+                if not self.skok:
+                    self.obecna_animacja = "run"
+            elif not self.skok:
                 self.obecna_animacja = "idle"
+                self.klatka_biegu = 0  # Reset animacji biegu gdy stoimy
+
+        # Aktualizacja animacji biegu
+        if self.obecna_animacja == "run" and not self.skok and not self.czy_laduje:
+            self.czas_animacji += 1
+            if self.czas_animacji >= self.czas_zmiany_klatki:
+                self.czas_animacji = 0
+                self.klatka_biegu = (self.klatka_biegu + 1) % len(self.animacje["run"])
 
         # Skok
-        if keys[pygame.K_SPACE] and not self.skok:
+        if keys[pygame.K_SPACE] and not self.skok and not self.czy_laduje:
             self.vel_y = -self.sila_skoku
             self.skok = True
-            self.obecna_animacja = "jump"
-            self.czas_skoku = self.czas_trwania_skoku  # Ustawiamy czas trwania skoku
+            self.obecna_animacja = "jump_up"
 
-        # Zmniejszamy licznik czasu skoku
-        if self.czas_skoku > 0:
-            self.czas_skoku -= 1
-            self.obecna_animacja = "jump"  # Wymuszamy animację skoku
-
-        # Atak (mieczem) - tylko jeśli nie skaczemy
-        if keys[pygame.K_z] and not self.skok:
-            self.obecna_animacja = "attack"
-
-        # Strzał (pocisk) - tylko jeśli nie skaczemy
-        if keys[pygame.K_x] and not self.skok:
-            self.obecna_animacja = "shoot"
+        # Zmiana animacji w trakcie skoku
+        if self.skok:
+            if self.vel_y < 0:
+                self.obecna_animacja = "jump_up"
+            else:
+                self.obecna_animacja = "jump_down"
 
         # Grawitacja
         self.vel_y += self.grawitacja
         self.rect.y += self.vel_y
 
-        # Sprawdź kolizję z podłożem
-        if self.rect.y >= WYSOKOSC - 100:
-            self.rect.y = WYSOKOSC - 100
-            self.skok = False
+        # Kolizja z podłożem
+        if self.rect.y >= WYSOKOSC_PODLOGI:
+            self.rect.y = WYSOKOSC_PODLOGI
             self.vel_y = 0
-            self.czas_skoku = 0  # Resetujemy czas skoku po wylądowaniu
+
+            if self.skok or self.poprzednia_animacja in ["jump_up", "jump_down"]:
+                self.obecna_animacja = "land"
+                self.czy_laduje = True
+                self.czas_ladowania = self.max_czas_ladowania
+                self.skok = False
+            elif not self.czy_laduje:
+                self.obecna_animacja = "idle"
+
+        # Animacja lądowania
+        if self.czy_laduje:
+            self.czas_ladowania -= 1
+            if self.czas_ladowania <= 0:
+                self.czy_laduje = False
+                self.obecna_animacja = "idle"
+
+        # Atak
+        if not self.skok and not self.czy_laduje:
+            if keys[pygame.K_z]:
+                self.obecna_animacja = "attack"
 
         # Aktualizacja obrazu
-        self.image = self.animacje[self.obecna_animacja][0]
+        if self.obecna_animacja == "run":
+            self.image = self.animacje["run"][self.klatka_biegu]
+        else:
+            self.image = self.animacje[self.obecna_animacja][0]
+
         if self.kierunek == -1:
             self.image = pygame.transform.flip(self.image, True, False)
-
 # Klasa Przeciwnika
 class Przeciwnik(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.animacje = {
-            "run": [load_image("img.png")],
-            "death": [load_image("img.png")],
-        }
-        self.obecna_animacja = "run"
-        self.image = self.animacje[self.obecna_animacja][0]  # Zmiana z self.obraz na self.image
+        self.image = load_image("playerIdle.png")
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -128,46 +163,34 @@ class Przeciwnik(pygame.sprite.Sprite):
             self.kierunek *= -1
             self.image = pygame.transform.flip(self.image, True, False)
 
-# Klasa Pocisku
-class Pocisk(pygame.sprite.Sprite):
-    def __init__(self, x, y, kierunek):
-        super().__init__()
-        self.image = load_image("img.png", 0.1)  # Zmiana z self.obraz na self.image
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.kierunek = kierunek
-        self.predkosc = 7
-
-    def update(self):
-        self.rect.x += self.predkosc * self.kierunek
-        if self.rect.x < 0 or self.rect.x > SZEROKOSC:
-            self.kill()
 
 # Główna pętla gry
 def main():
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
     przeciwnicy = pygame.sprite.Group()
-    pociski = pygame.sprite.Group()
 
     # Tworzenie gracza
-    gracz = Gracz(100, 400)
+    gracz = Gracz(100, WYSOKOSC_PODLOGI - 200)
     all_sprites.add(gracz)
 
     # Tworzenie przeciwników
     for i in range(3):
-        przeciwnik = Przeciwnik(300 + i * 150, 450)
+        przeciwnik = Przeciwnik(300 + i * 150, WYSOKOSC_PODLOGI - 100)
         all_sprites.add(przeciwnik)
         przeciwnicy.add(przeciwnik)
 
-    # Tło - jeśli plik nie istnieje, tworzymy zastępcze tło
+    # Ładowanie tła
     try:
-        tlo = load_image("background.png")
+        tlo = pygame.image.load("background.png").convert()
         tlo = pygame.transform.scale(tlo, (SZEROKOSC, WYSOKOSC))
-    except:
+    except pygame.error as e:
+        print(f"Nie można załadować tła: {e}")
         tlo = pygame.Surface((SZEROKOSC, WYSOKOSC))
         tlo.fill((100, 100, 200))  # Niebieskie tło jeśli brak pliku
+
+    podloga = pygame.Surface((SZEROKOSC, WYSOKOSC - WYSOKOSC_PODLOGI))
+    podloga.fill((100, 70, 30))  # Brązowy kolor podłogi
 
     running = True
     while running:
@@ -175,29 +198,20 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_x:  # Strzał
-                    pocisk = Pocisk(gracz.rect.centerx, gracz.rect.centery, gracz.kierunek)
-                    all_sprites.add(pocisk)
-                    pociski.add(pocisk)
 
         # Aktualizacja
         all_sprites.update()
 
-        # Kolizje: Pocisk z przeciwnikiem
-        for pocisk in pociski:
-            trafienia = pygame.sprite.spritecollide(pocisk, przeciwnicy, True)
-            for przeciwnik in trafienia:
-                pocisk.kill()
-
         # Rysowanie
         ekran.blit(tlo, (0, 0))
+        ekran.blit(podloga, (0, WYSOKOSC_PODLOGI))  # Rysuj podłogę
         all_sprites.draw(ekran)
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     main()
