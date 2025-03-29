@@ -7,8 +7,8 @@ class Przeciwnik(pygame.sprite.Sprite):
     def __init__(self, x, wysokosc_podlogi, predkosc):
         super().__init__()
         self.animacje = [
-            load_image("enemy1.png"),
-            load_image("enemy2.png")
+            load_image("gameImages/enemy1.png"),
+            load_image("gameImages/enemy2.png")
         ]
         self.klatka_animacji = 0
         self.czas_animacji = 0
