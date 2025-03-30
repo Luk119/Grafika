@@ -9,7 +9,7 @@ class StanGry:
     def __init__(self):
         self.punkty = 0
         self.poziom = 1
-        self.max_poziom = 10
+        self.max_poziom = 5
         self.czy_wyswietlac_komunikat = False
         self.czas_komunikatu = 0
         self.max_czas_komunikatu = 2 * 60
@@ -121,7 +121,7 @@ def main():
             ekran.blit(tekst_komunikat, (SZEROKOSC // 2 - szerokosc_tekstu // 2, WYSOKOSC // 2 - 100))
 
         # Wyświetlanie życia
-        tekst_zycie = czcionka.render(f"Zdrowie: {' ❤️' * gracz.zycie}", True, ZIELONY)
+        tekst_zycie = czcionka.render(f"Zdrowie: {' 0' * gracz.zycie}", True, ZIELONY)
         ekran.blit(tekst_zycie, (20, WYSOKOSC - 150))
 
         # Sprawdź koniec gry
