@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import comb
 # (MacOs)
-# matplotlib.use('MacOSX')
+matplotlib.use('MacOSX')
 # (Windows)
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 
 
@@ -79,14 +79,14 @@ def read_control_points_from_txt(file_path, shape):
 
 
 # Wczytanie punktów kontrolnych dla filiżanki, dzbanka i łyżki(MacOs)
-# teacup_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty2"
-# teapot_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty.txt"
-# spoon_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty3.txt"
+teacup_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty2"
+teapot_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty.txt"
+spoon_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty3.txt"
 
 # (Windows)
-teacup_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty2"
-teapot_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty.txt"
-spoon_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty3.txt"
+# teacup_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty2"
+# teapot_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty.txt"
+# spoon_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty3.txt"
 
 teacup_points = read_control_points_from_txt(teacup_file, (26, 16, 3))
 teapot_points = read_control_points_from_txt(teapot_file, (32, 16, 3))
