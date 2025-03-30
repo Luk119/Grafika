@@ -4,9 +4,9 @@ import pygame
 pygame.init()
 
 # Ustawienia ekranu
-SZEROKOSC = 1824
-WYSOKOSC = 1200
-WYSOKOSC_PODLOGI = 1000
+SZEROKOSC = 1124
+WYSOKOSC = 800
+WYSOKOSC_PODLOGI = 700
 ekran = pygame.display.set_mode((SZEROKOSC, WYSOKOSC))
 pygame.display.set_caption("Elvis Szczurołap")
 
