@@ -121,8 +121,10 @@ def main():
             ekran.blit(tekst_komunikat, (SZEROKOSC // 2 - szerokosc_tekstu // 2, WYSOKOSC // 2 - 100))
 
         # Wyświetlanie życia
-        tekst_zycie = czcionka.render(f"Zdrowie: {' 0' * gracz.zycie}", True, ZIELONY)
+        tekst_zycie = czcionka.render(f"Zdrowie: {' 0' * gracz.zycie}", True, CZARNY)
         ekran.blit(tekst_zycie, (20, WYSOKOSC - 150))
+        tekst_zycie = czcionka.render(f"Zdrowie: {' 0' * gracz.zycie}", True, ZIELONY)
+        ekran.blit(tekst_zycie, (22, WYSOKOSC - 152))
 
         # Sprawdź koniec gry
         if stan_gry.czy_koniec_gry:
