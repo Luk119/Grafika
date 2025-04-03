@@ -1,6 +1,7 @@
+# Klasa Gracza
 from Stale import *
 from LoadImage import *
-# Klasa Gracza
+
 class Gracz(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
