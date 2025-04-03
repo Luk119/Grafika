@@ -8,7 +8,7 @@ def bezier_curve(p0, p1, p2, p3, t):
     return x, y
 
 # rysowanie krzywych na obrazie
-def draw_curves(curves, filename, color='black'):
+def draw_curves(curves, filename, color='balck'):
     width, height = 500, 450
     img = Image.new('RGB', (width, height), color='white')
     draw = ImageDraw.Draw(img)
@@ -18,18 +18,18 @@ def draw_curves(curves, filename, color='black'):
         curve_points = [(int(bezier_curve(p0, p1, p2, p3, t)[0]), int(bezier_curve(p0, p1, p2, p3, t)[1])) for t in
                         np.linspace(0, 1, 100)]
 
-        # Rysowanie krzywej Béziera
+        # rysowanie krzywej Béziera
         draw.line(curve_points, fill=color, width=2)
 
-        # Rysowanie linii pomocniczych do punktów kontrolnych
+        # rysowanie linii pomocniczych do punktów kontrolnych
         draw.line([tuple(p0), tuple(p1)], fill='gray', width=1)
         draw.line([tuple(p0), tuple(p2)], fill='gray', width=1)
 
-        # Rysowanie punktów kontrolnych
+        # rysowanie punktów kontrolnych
         for p in [p1, p2, p3]:
             draw.ellipse([p[0] - 3, p[1] - 3, p[0] + 3, p[1] + 3], fill='black')
 
-        # Rysowanie głównych punktów początkowych (na czerwono)
+        # rysowanie punktow początkowych (na czerwono)
         draw.ellipse([p0[0] - 5, p0[1] - 5, p0[0] + 5, p0[1] + 5], fill='red')
 
     img.show()
