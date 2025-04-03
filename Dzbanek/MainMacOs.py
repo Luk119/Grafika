@@ -3,17 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import comb
 
-# ustawienie backendu matplotlib na macos
 matplotlib.use('MacOSX')
 
-
 def bernstein(n, i, t):
-    # funkcja obliczająca wartość wielomianu bernsteina
     return comb(n, i) * (t ** i) * ((1 - t) ** (n - i))
 
 
 def bezier_patch(control_points):
-    # tworzenie siatki punktów parametrycznych dla powierzchni béziera
+    # tworzenie siatki punktów
     resolution = 20
     u_vals = np.linspace(0, 1, resolution)
     w_vals = np.linspace(0, 1, resolution)
@@ -48,11 +45,11 @@ def plot_objects(teacup_points, teapot_points, spoon_points, shift_x=4.0):
     # poprawiona orientacja filiżanki
     teacup_points = np.copy(teacup_points) * 1.5
     teacup_points[:, :, [1, 2]] = teacup_points[:, :, [2, 1]]  # zamiana y i z
-    teacup_points[:, :, 0] += shift_x  # przesunięcie filiżanki obok dzbanka
+    teacup_points[:, :, 0] += shift_x
 
     # przesunięcie łyżki dla lepszego widoku
     spoon_points = np.copy(spoon_points) * 2
-    spoon_points[:, :, 0] -= 2.0  # przesunięcie w lewo
+    spoon_points[:, :, 0] -= 2.0
 
     # rysowanie filiżanki
     for k in range(teacup_points.shape[0]):
@@ -93,7 +90,7 @@ def read_control_points_from_txt(file_path, shape):
     return np.array(points).reshape(shape)
 
 
-# ścieżki do plików zawierających punkty kontrolne (macos)
+# (macos)
 teapot_file = "punkty.txt"
 teacup_file = "punkty2.txt"
 spoon_file = "punkty3.txt"
