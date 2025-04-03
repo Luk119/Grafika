@@ -35,7 +35,7 @@ def draw_curves(curves, filename, color='balck'):
     img.show()
     img.save(filename)
 
-# Krzywe dla litery Ł
+# krzywe dla litery Ł
 curves_L = [
     [[224, 139], [205, 229], [190, 328], [176, 324]],
     [[176, 324], [85, 299], [231, 409], [202, 350]],
@@ -50,7 +50,7 @@ curves_L = [
     [[268, 137], [346, 98], [167, 104], [225, 138]],
 ]
 
-# Krzywe dla litery K
+# krzywe dla litery K
 curves_K = [
     [[200, 100], [90, 50], [350, 45], [240, 105]],
     [[240, 105], [230, 115], [255, 170], [240, 185]],
