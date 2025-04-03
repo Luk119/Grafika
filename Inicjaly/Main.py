@@ -38,7 +38,7 @@ def draw_curves(curves, filename, color='black'):
     img.save(filename)
 
 
-# Krzywe dla litery "Ł"
+# Krzywe dla litery Ł
 curves_L = [
     [[224, 139], [205, 229], [190, 328], [176, 324]],
     [[176, 324], [85, 299], [231, 409], [202, 350]],
@@ -53,9 +53,7 @@ curves_L = [
     [[268, 137], [346, 98], [167, 104], [225, 138]],
 ]
 
-
-
-# Krzywe dla litery "K"
+# Krzywe dla litery K
 curves_K = [
     [[200, 100], [90, 50], [350, 45], [240, 105]],
     [[240, 105], [230, 115], [255, 170], [240, 185]],
@@ -70,6 +68,5 @@ curves_K = [
     [[170, 360], [230, 330], [200, 100], [200, 100]],
 ]
 
-# Rysowanie i zapisywanie dwóch oddzielnych obrazów
 draw_curves(curves_L, "litera_L.png", color='black')
 draw_curves(curves_K, "litera_K.png", color='black')
