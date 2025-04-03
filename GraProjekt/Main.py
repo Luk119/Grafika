@@ -23,10 +23,10 @@ def nowy_poziom(stan_gry, all_sprites, przeciwnicy, gracz):
 
     # Utwórz nowych przeciwników (liczba równa poziomowi + 2)
     liczba_przeciwnikow = stan_gry.poziom + 2
-    predkosc_przeciwnikow = 2 + stan_gry.poziom * 2.3 # Zwiększ prędkość z każdym poziomem
+    predkosc_przeciwnikow = 2 + stan_gry.poziom * 1.4 # Zwiększ prędkość z każdym poziomem
 
     for i in range(liczba_przeciwnikow):
-        x = 300 + i * (SZEROKOSC - 600) // liczba_przeciwnikow
+        x = 300 + i * (SZEROKOSC - 300) // liczba_przeciwnikow
         przeciwnik = Przeciwnik(x, WYSOKOSC_PODLOGI, predkosc_przeciwnikow)
         all_sprites.add(przeciwnik)
         przeciwnicy.add(przeciwnik)
