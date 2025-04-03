@@ -1,4 +1,3 @@
-import pygame
 import sys
 from Przeciwnik import *
 from Gracz import *
@@ -24,7 +23,7 @@ def nowy_poziom(stan_gry, all_sprites, przeciwnicy, gracz):
 
     # Utwórz nowych przeciwników (liczba równa poziomowi + 2)
     liczba_przeciwnikow = stan_gry.poziom + 2
-    predkosc_przeciwnikow = 2 + stan_gry.poziom * 0.2  # Zwiększ prędkość z każdym poziomem
+    predkosc_przeciwnikow = 2 + stan_gry.poziom * 2.3 # Zwiększ prędkość z każdym poziomem
 
     for i in range(liczba_przeciwnikow):
         x = 300 + i * (SZEROKOSC - 600) // liczba_przeciwnikow
@@ -140,7 +139,6 @@ def main():
 
     pygame.quit()
     sys.exit()
-
 
 if __name__ == "__main__":
     main()
