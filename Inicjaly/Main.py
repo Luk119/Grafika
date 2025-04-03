@@ -1,15 +1,13 @@
 import numpy as np
 from PIL import Image, ImageDraw
 
-
-# Funkcja do obliczania punktów krzywej Béziera
+# obliczania punktów krzywej Béziera
 def bezier_curve(p0, p1, p2, p3, t):
     x = (1 - t) ** 3 * p0[0] + 3 * (1 - t) ** 2 * t * p1[0] + 3 * (1 - t) * t ** 2 * p2[0] + t ** 3 * p3[0]
     y = (1 - t) ** 3 * p0[1] + 3 * (1 - t) ** 2 * t * p1[1] + 3 * (1 - t) * t ** 2 * p2[1] + t ** 3 * p3[1]
-    return (x, y)
+    return x, y
 
-
-# Funkcja rysująca krzywe na obrazie
+# rysowanie krzywych na obrazie
 def draw_curves(curves, filename, color='black'):
     width, height = 500, 450
     img = Image.new('RGB', (width, height), color='white')
@@ -36,7 +34,6 @@ def draw_curves(curves, filename, color='black'):
 
     img.show()
     img.save(filename)
-
 
 # Krzywe dla litery Ł
 curves_L = [
