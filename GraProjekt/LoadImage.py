@@ -1,5 +1,6 @@
+# Ładowanie obrazów
 import pygame
-# Ładowanie grafik
+
 def load_image(path, scale=1):
     try:
         img = pygame.image.load(path).convert_alpha()
