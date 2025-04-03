@@ -2,16 +2,11 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 from math import comb
-# (MacOs)
-# matplotlib.use('MacOSX')
 # (Windows)
 matplotlib.use('TkAgg')
 
-
-
 def bernstein(n, i, t):
     return comb(n, i) * (t ** i) * ((1 - t) ** (n - i))
-
 
 def bezier_patch(control_points):
     resolution = 20
@@ -79,12 +74,12 @@ def read_control_points_from_txt(file_path, shape):
 
 
 # Wczytanie punktów kontrolnych dla filiżanki, dzbanka i łyżki(MacOs)
-# teacup_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty2"
+# teacup_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty2.txt"
 # teapot_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty.txt"
 # spoon_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty3.txt"
 
 # (Windows)
-teacup_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty2"
+teacup_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty2.txt"
 teapot_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty.txt"
 spoon_file = "C:\Pythonik studia\Grafika\Dzbanek\punkty3.txt"
 
