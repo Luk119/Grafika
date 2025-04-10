@@ -72,7 +72,6 @@ def read_control_points_from_txt(file_path, shape):
         raise ValueError("Nieprawidłowa liczba punktów w pliku " + file_path)
     return np.array(points).reshape(shape)
 
-
 # Wczytanie punktów kontrolnych dla filiżanki, dzbanka i łyżki(MacOs)
 # teacup_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty2.txt"
 # teapot_file = "/Users/lukaszkundzicz/PycharmProjects/Grafika/Dzbanek/punkty.txt"
