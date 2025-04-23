@@ -22,8 +22,8 @@ def draw_curves(curves, filename, color='balck'):
         draw.line(curve_points, fill=color, width=2)
 
         # rysowanie linii pomocniczych do punktów kontrolnych
-        draw.line([tuple(p0), tuple(p1)], fill='gray', width=1)
-        draw.line([tuple(p0), tuple(p2)], fill='gray', width=1)
+        draw.line([tuple(p0), tuple(p1)], fill='blue', width=1)
+        draw.line([tuple(p0), tuple(p2)], fill='blue', width=1)
 
         # rysowanie punktów kontrolnych
         for p in [p1, p2, p3]:
