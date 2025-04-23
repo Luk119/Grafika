@@ -2,7 +2,6 @@ import pygame
 import time
 import random
 
-
 snake_speed = 5
 
 # Window size
@@ -23,10 +22,10 @@ pygame.init()
 pygame.display.set_caption('GeeksforGeeks Snakes')
 game_window = pygame.display.set_mode((window_x, window_y))
 
-# FPS (frames per second) controller
+# FPS controller
 fps = pygame.time.Clock()
 
-# defining snake default position
+# defining
 snake_position = [100, 50]
 
 # defining first 4 blocks of snake body
