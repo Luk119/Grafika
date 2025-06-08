@@ -1,5 +1,6 @@
 from PIL import Image
-
+import numpy as np
+import matplotlib.pyplot as plt
 def negatyw():
     img = Image.open('auto.jpg')
     w, h = img.size
@@ -93,4 +94,13 @@ def filtry():
             result.putpixel((i, j), (tmp_r, tmp_g, tmp_b))
     result.show()
 
-filtry()
+def histogram():
+    img = Image.open("negatyw.jpg")
+    arr = np.array(img)
+    r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    plt.hist(r.ravel(), bins = 256, color = 'red')
+    plt.hist(g.ravel(), bins = 256, color = 'green')
+    plt.hist(b.ravel(), bins = 256, color = 'blue')
+    plt.show()
+
+histogram()
