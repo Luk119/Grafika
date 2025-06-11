@@ -103,4 +103,26 @@ def histogram():
     plt.hist(b.ravel(), bins = 256, color = 'blue')
     plt.show()
 
-histogram()
+def mieszanie_przezroczystosc(alfa):
+    if alfa < 0 and alfa > 1:
+        return
+
+    img1 = Image.open('auto.jpg')
+    img2 = Image.open('droga.jpg')
+    w1, h1 = img1.size
+    w2, h2 = img2.size
+    w_c = min(w1, w2)
+    h_c = min(h1, h2)
+    result = Image.new('RGB', (w_c, h_c))
+    for i in range(w_c):
+        for j in range(h_c):
+            r1, g1, b1 = img1.getpixel((i, j))
+            r2, g2, b2 = img2.getpixel((i, j))
+            r = int(1-alfa*r2 + r1*alfa)
+            g = int(1-alfa*g2 + g1*alfa)
+            b = int(1-alfa*b2 + b1*alfa)
+            result.putpixel((i, j), (r, g, b))
+
+    result.show()
+
+mieszanie_przezroczystosc(0.9)
